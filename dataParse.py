@@ -1,3 +1,11 @@
+#Instructions on how to install venv
+#Open file location in terminal
+#Run the following commands
+#1) python3 -m venv .env
+#2) .env/bin/activate
+#3) pip install -r requirements.txt
+#4) python3 dataParse.py
+
 import numpy as np
 import scipy.signal as sig
 
