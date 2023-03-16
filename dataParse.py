@@ -4,12 +4,14 @@
 # 1) python -m venv .env
 # 2) .env\Scripts\activate
 # 3) pip install -r requirements.txt
-# 4) python dataParse.py
+# 4) Change file path before running code
+# 5) python dataParse.py
 
 import numpy as np
 import scipy.signal as sig
 
-filepath = "data/new_sensor_2sec_on_2min_off_3"  # Change it before running code
+# no need to add the extension of the file
+filepath = "data/new_sensor_2sec_on_2min_off_3"
 
 data = np.genfromtxt(filepath + ".txt", delimiter=",", names=True)
 
@@ -28,7 +30,7 @@ for i in range(len(idxs)):
     tmp = idxs[i]
     for j in range(1500):
         # if the value is within +/- 2 of the base value (left of the peak)
-        if resistance[rnge[i]] > resistance[tmp]:
+        if resistance[start_idx[i]] > resistance[tmp]:
             start_idx[i] = tmp
         tmp += 1
         if tmp == len(resistance):
