@@ -9,20 +9,33 @@
 
 import numpy as np
 import scipy.signal as sig
+import matplotlib.pyplot as plt
+from datetime import datetime
+
+graph = False # Set to True to see graph of data for debugging
 
 # no need to add the extension of the file
-filepath = "data/new_sensor_2sec_on_2min_off_3"
+filepath = "data/100ml_104_S12"
 
 data = np.genfromtxt(filepath + ".txt", delimiter=",", names=True)
 
-# save the first coloumn and secound column as timestamp and resitance
-timestamp = data['timestamp']
-resistance = data['S15']
+# Storing resistance as variable
+timestamp = data['timestamp'] 
+resistance = data['O2']
+if (graph == True):
+    plt.plot(resistance[:10000])
+    plt.show()
+
+conv_dt = [datetime.fromtimestamp(ts/1000) for ts in timestamp]
 
 idxs, properties = sig.find_peaks(resistance,
-                                  width=1700,
-                                  distance=1000,
-                                  height=54000)
+                                  width=1000, #Default 1700
+                                  distance=500, #Default 1000
+                                  height=190000) #Default 54000
+
+if not idxs.any():
+    print("No peaks found")
+    exit()
 
 start_idx = np.zeros([len(idxs), 1], dtype=int)
 for i in range(len(idxs)):
@@ -47,3 +60,17 @@ for i in range(len(idxs)):
 save_file = filepath + "_ratio"
 np.savetxt(save_file+".txt", ratio, delimiter=",")
 np.savetxt(save_file+".csv", ratio, delimiter=",")
+
+#plotting Data
+pLim = 8
+tLim = 8
+x_limP = [idxs[i] for i in range(pLim)]
+x_limT = [start_idx[i].item() for i in range(tLim)]
+
+plt.plot(conv_dt[:25000], resistance[:25000])
+plt.plot([conv_dt[i] for i in x_limP], resistance[idxs[:pLim]], "x")
+plt.plot([conv_dt[i] for i in x_limT], resistance[start_idx[:tLim]], "o")
+plt.show()
+
+plt.plot(ratio)
+plt.show()
