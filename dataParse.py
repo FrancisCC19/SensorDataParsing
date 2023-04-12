@@ -4,7 +4,7 @@
 # 1) python -m venv .env
 # 2) .env\Scripts\activate
 # 3) pip install -r requirements.txt
-# 4) Change file path before running code
+# 4) Change file path and find_peak function before running code
 # 5) python dataParse.py
 
 import numpy as np
@@ -29,9 +29,9 @@ if (graph == True):
 conv_dt = [datetime.fromtimestamp(ts/1000) for ts in timestamp]
 
 idxs, properties = sig.find_peaks(resistance,
-                                  width=1000, #Default 1700
-                                  distance=500, #Default 1000
-                                  height=190000) #Default 54000
+                                  width=1000, #Default 1700, set based on the debug graph
+                                  distance=500, #Default 1000, set based on the debug graph
+                                  height=190000) #Default 54000, set based on the debug graph
 
 if not idxs.any():
     print("No peaks found")
@@ -62,12 +62,13 @@ np.savetxt(save_file+".txt", ratio, delimiter=",")
 np.savetxt(save_file+".csv", ratio, delimiter=",")
 
 #plotting Data
-pLim = 8
-tLim = 8
+resLim = 15000 # number of data points to plot
+pLim = 8 # number of peaks to plot
+tLim = 8 # number of troughs to plot
 x_limP = [idxs[i] for i in range(pLim)]
 x_limT = [start_idx[i].item() for i in range(tLim)]
 
-plt.plot(conv_dt[:25000], resistance[:25000])
+plt.plot(conv_dt[:resLim], resistance[:resLim])
 plt.plot([conv_dt[i] for i in x_limP], resistance[idxs[:pLim]], "x")
 plt.plot([conv_dt[i] for i in x_limT], resistance[start_idx[:tLim]], "o")
 plt.show()
