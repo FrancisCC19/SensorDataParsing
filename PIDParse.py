@@ -19,7 +19,7 @@ controlFrame = ttk.Frame(root, padding="3 3 12 12")
 controlFrame.grid(column=0, row=0, sticky=(N, W, E, S))
 
 def parseData():
-    global idxs, ratio, start_idx, conv_dt
+    global idxs, ratio, start_idx, conv_dt, delta
     status.set("Status: Processing")
     timestamp = data['timestamp']
     conv_dt = [datetime.fromtimestamp(ts/1000) for ts in timestamp]
@@ -71,7 +71,13 @@ def graphData():
     plt.plot([conv_dt[i] for i in x_limT], filtered_res[start_idx[:tLim]], "o")
     plt.show()
 
-    plt.plot(ratio)
+    fig, ax1 = plt.subplots(1, 2, figsize=(10, 10))
+    ax1[0].plot(ratio)
+    ax1[0].set_title("Ratio")
+
+    ax1[1].plot(delta)
+    ax1[1].set_title("Delta")
+    fig.tight_layout()
     plt.show()
 
 
