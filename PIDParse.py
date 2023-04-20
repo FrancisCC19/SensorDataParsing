@@ -19,10 +19,9 @@ controlFrame = ttk.Frame(root, padding="3 3 12 12")
 controlFrame.grid(column=0, row=0, sticky=(N, W, E, S))
 
 def parseData():
-    global idxs, ratio, start_idx, conv_dt, delta
+    global idxs, ratio, start_idx, delta
     status.set("Status: Processing")
-    timestamp = data['timestamp']
-    conv_dt = [datetime.fromtimestamp(ts/1000) for ts in timestamp]
+    
     idxs, properties = sig.find_peaks(filtered_res,
                             width=width.get(), #Default 1700, set based on the debug graph
                             distance=distance.get(), #Default 1000, set based on the debug graph
@@ -71,25 +70,29 @@ def graphData():
     plt.plot([conv_dt[i] for i in x_limT], filtered_res[start_idx[:tLim]], "o")
     plt.show()
 
-    fig, ax1 = plt.subplots(1, 2, figsize=(10, 10))
-    ax1[0].plot(ratio)
+    fig, ax1 = plt.subplots(1, 2, figsize=(5, 10))
+    ax1[0].plot([conv_dt[i] for i in idxs], ratio)
     ax1[0].set_title("Ratio")
+    ax1[0].set_xlabel("Time(M-D HH)")
 
-    ax1[1].plot(delta)
+    ax1[1].plot([conv_dt[i] for i in idxs], delta)
     ax1[1].set_title("Delta")
+    ax1[1].set_xlabel("Time(M-D HH)")
     fig.tight_layout()
     plt.show()
 
 
 def setFilepath():
-    global data, filtered_res
+    global data, filtered_res, conv_dt
     status.set("Status: Processing")
     data = np.genfromtxt(filePath.get() + ".txt", delimiter=",", names=True)
     resistance = data[selColumn.get()]
+    timestamp = data['timestamp']
+    conv_dt = [datetime.fromtimestamp(ts/1000) for ts in timestamp]
     filtered_res = sig.savgol_filter(resistance, 1001, 5)# Savitzky-Golay filter, window needs to be odd
     if (graph.get() == True):
-        plt.plot(resistance[:10000], label="Noisy Signal", linestyle="--", alpha=0.7)
-        plt.plot(filtered_res[:10000], label="Smoothed Signal", color="r", linewidth=2)
+        plt.plot(conv_dt[:10000], resistance[:10000], label="Noisy Signal", linestyle="--", alpha=0.7)
+        plt.plot(conv_dt[:10000], filtered_res[:10000], label="Smoothed Signal", color="r", linewidth=2)
         plt.legend()
         plt.show()
     status.set("Status: Set File Path")
