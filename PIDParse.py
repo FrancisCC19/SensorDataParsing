@@ -18,20 +18,21 @@ root = Tk()
 controlFrame = ttk.Frame(root, padding="3 3 12 12")
 controlFrame.grid(column=0, row=0, sticky=(N, W, E, S))
 
+
 def parseData():
     global idxs, ratio, start_idx, delta
     status.set("Status: Processing")
-    
+
     idxs, properties = sig.find_peaks(filtered_res,
-                            width=width.get(), #Default 1700, set based on the debug graph
-                            distance=distance.get(), #Default 1000, set based on the debug graph
-                            height=height.get()) #Default 54000, set based on the debug graph
-    
+                                      width=width.get(),  # Default 1700, set based on the debug graph
+                                      distance=distance.get(),  # Default 1000, set based on the debug graph
+                                      height=height.get())  # Default 54000, set based on the debug graph
+
     if not idxs.any():
         print("No peaks found")
         status.set("Status: Failed to find peaks")
-        return;
-    
+        return
+
     start_idx = np.zeros([len(idxs), 1], dtype=int)
     for i in range(len(idxs)):
         # Find the trough to the left of the peak
@@ -44,25 +45,28 @@ def parseData():
             if tmp == len(filtered_res):
                 start_idx[i] = len(filtered_res) - 1
                 break
-    
+
     ratio = np.zeros([len(idxs), 1], dtype=float)
     delta = np.zeros([len(idxs), 1], dtype=float)
 
     for i in range(len(idxs)):
         ratio[i] = filtered_res[idxs[i]] / filtered_res[start_idx[i]]
         delta[i] = filtered_res[idxs[i]] - filtered_res[start_idx[i]]
-    
+
+    idx_time = [conv_dt[i] for i in idxs]
+
     # save ratio as a csv file and text file
     save_file = filePath.get() + "_ratio"
     with open(save_file+".txt", "w") as f:
-        for a, b in zip(ratio, delta):
-            f.write(f"{a},{b}\n")
+        for a, b, c in zip(ratio, delta, idx_time):
+            f.write(f"{a},{b},{c}\n")
     status.set("Status: Done Parsing")
 
+
 def graphData():
-    resLim = 60000 # number of data points to plot
-    pLim = 10 # number of peaks to plot
-    tLim = 10 # number of troughs to plot
+    resLim = 60000  # number of data points to plot
+    pLim = 10  # number of peaks to plot
+    tLim = 10  # number of troughs to plot
     x_limP = [idxs[i] for i in range(pLim)]
     x_limT = [start_idx[i].item() for i in range(tLim)]
     plt.plot(conv_dt[:resLim], filtered_res[:resLim])
@@ -89,15 +93,19 @@ def setFilepath():
     resistance = data[selColumn.get()]
     timestamp = data['timestamp']
     conv_dt = [datetime.fromtimestamp(ts/1000) for ts in timestamp]
-    filtered_res = sig.savgol_filter(resistance, 1001, 5)# Savitzky-Golay filter, window needs to be odd
+    # Savitzky-Golay filter, window needs to be odd
+    filtered_res = sig.savgol_filter(resistance, 1001, 5)
     if (graph.get() == True):
-        plt.plot(conv_dt[:10000], resistance[:10000], label="Noisy Signal", linestyle="--", alpha=0.7)
-        plt.plot(conv_dt[:10000], filtered_res[:10000], label="Smoothed Signal", color="r", linewidth=2)
+        plt.plot(conv_dt[:10000], resistance[:10000],
+                 label="Noisy Signal", linestyle="--", alpha=0.7)
+        plt.plot(conv_dt[:10000], filtered_res[:10000],
+                 label="Smoothed Signal", color="r", linewidth=2)
         plt.legend()
         plt.show()
     status.set("Status: Set File Path")
 
-#Filepath
+
+# Filepath
 filePath = StringVar()
 selColumn = StringVar()
 selColumn.set("null")
@@ -112,15 +120,16 @@ filePathEntry.grid(column=2, row=1, sticky=(W, E))
 columnEntry = ttk.Entry(controlFrame, width=20, textvariable=selColumn)
 columnEntry.grid(column=3, row=1, sticky=(W, E))
 
-ttk.Button(controlFrame, text="Set Filepath", command=setFilepath).grid(column=4, row=1, sticky=W)
+ttk.Button(controlFrame, text="Set Filepath",
+           command=setFilepath).grid(column=4, row=1, sticky=W)
 
-#Graph true or false button
+# Graph true or false button
 graph = BooleanVar()
 graph.set(True)
 graphbutton = ttk.Checkbutton(controlFrame, text="Graph", variable=graph)
 graphbutton.grid(column=5, row=1, sticky=W)
 
-#Width Entry, distance entry, height entry
+# Width Entry, distance entry, height entry
 width = IntVar()
 width.set(500)
 distance = IntVar()
@@ -139,11 +148,13 @@ distanceEntry.grid(column=3, row=3, sticky=(W, E))
 heightEntry = ttk.Entry(controlFrame, width=20, textvariable=height)
 heightEntry.grid(column=4, row=3, sticky=(W, E))
 
-#Parse and graph button
-ttk.Button(controlFrame, text="Parse", command=parseData).grid(column=2, row=4, sticky=W)
-ttk.Button(controlFrame, text="Graph", command=graphData).grid(column=3, row=4, sticky=W)
+# Parse and graph button
+ttk.Button(controlFrame, text="Parse", command=parseData).grid(
+    column=2, row=4, sticky=W)
+ttk.Button(controlFrame, text="Graph", command=graphData).grid(
+    column=3, row=4, sticky=W)
 
-#Status label
+# Status label
 status = StringVar()
 status.set("Status: Idle")
 ttk.Label(controlFrame, textvariable=status).grid(column=2, row=5, sticky=W)
