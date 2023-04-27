@@ -37,6 +37,7 @@ def parseData():
     for i in range(len(idxs)):
         # Find the trough to the left of the peak
         tmp = idxs[i]
+        start_idx[i] = tmp
         for j in range(3000):
             # if the value is within +/- 2 of the base value (left of the peak)
             if filtered_res[start_idx[i]] > filtered_res[tmp]:
@@ -56,7 +57,7 @@ def parseData():
     idx_time = [conv_dt[i] for i in idxs]
 
     # save ratio as a csv file and text file
-    save_file = filePath.get() + "_ratio"
+    save_file = filePath.get() + "_parsed"
     with open(save_file+".txt", "w") as f:
         for a, b, c in zip(ratio, delta, idx_time):
             f.write(f"{a},{b},{c}\n")
