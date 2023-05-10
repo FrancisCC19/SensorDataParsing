@@ -54,10 +54,13 @@ def parseData():
     for i in range(len(idxs)):
         ratio[i] = resistance[idxs[i]] / resistance[start_idx[i]]
 
+    idx_time = [conv_dt[i] for i in idxs]
+
     # save ratio as a csv file and text file
     save_file = filePath.get() + "_ratio"
-    np.savetxt(save_file+".txt", ratio, delimiter=",")
-    np.savetxt(save_file+".csv", ratio, delimiter=",")
+    with open(save_file+".txt", "w") as f:
+        for a, b in zip(idx_time, ratio):
+            f.write(f"{a},{b}\n")
     status.set("Status: Done Parsing")
 
 

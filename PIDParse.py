@@ -57,10 +57,10 @@ def parseData():
     idx_time = [conv_dt[i] for i in idxs]
 
     # save ratio as a csv file and text file
-    save_file = filePath.get() + "_parsed"
+    save_file = filePath.get() + "_delta"
     with open(save_file+".txt", "w") as f:
-        for a, b, c in zip(ratio, delta, idx_time):
-            f.write(f"{a},{b},{c}\n")
+        for a, b in zip(idx_time, delta):
+            f.write(f"{a},{b}\n")
     status.set("Status: Done Parsing")
 
 
